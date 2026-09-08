@@ -460,6 +460,19 @@
     <h1>Dashboard de Riesgos</h1>
     <p class="subtitle">Lectura visual del AMFE: matriz de riesgo, concentración por proceso, resolución y país.</p>
 
+    <div class="toolbar">
+      <select id="dashFiltroPeriodo"><option value="">Período: todos</option></select>
+      <select id="dashFiltroPais"><option value="">País: todos</option></select>
+      <select id="dashFiltroProceso"><option value="">Proceso: todos</option></select>
+      <select id="dashFiltroResolucion">
+        <option value="">Significativo: todos</option>
+        <option value="Significativo">Solo Significativos</option>
+        <option value="No Significativo">Solo No Significativos</option>
+      </select>
+      <div class="spacer"></div>
+      <button class="btn btn-ghost btn-sm" id="btnLimpiarFiltrosDash">Limpiar filtros</button>
+    </div>
+
     <div class="stat-row" id="dashStatRow"></div>
 
     <div class="grid-2" style="align-items:start;">
@@ -669,6 +682,19 @@ function campoValor(v){
   return v==null ? '' : v;
 }
 
+// Las columnas "Varias líneas de texto" configuradas como Texto Enriquecido
+// en SharePoint devuelven el contenido envuelto en HTML (ej.
+// <div class="ExternalClass...">) aunque se haya guardado texto plano.
+// Esta función lo deja como texto plano sin importar de dónde venga.
+function textoPlano(html){
+  if(html == null) return '';
+  const str = String(html);
+  if(!/<[a-z][\s\S]*>/i.test(str)) return str; // ya es texto plano, no tocar
+  const tmp = document.createElement('div');
+  tmp.innerHTML = str;
+  return (tmp.textContent || tmp.innerText || '').trim();
+}
+
 // Normaliza los campos Choice/Lookup de un item del AMFE que vuelven de
 // SharePoint envueltos en objeto ({Id,Value}) a texto plano, para que el
 // resto del código pueda tratarlos siempre como strings.
@@ -681,6 +707,13 @@ function normalizarAmfeItem(it){
     EstrategiaTratamiento: campoValor(it.EstrategiaTratamiento),
     Resultado: campoValor(it.Resultado),
     Resolucion: campoValor(it.Resolucion),
+    ModoFalla: textoPlano(it.ModoFalla),
+    EfectosPotenciales: textoPlano(it.EfectosPotenciales),
+    CausasPotenciales: textoPlano(it.CausasPotenciales),
+    ControlesActuales: textoPlano(it.ControlesActuales),
+    AccionesRecomendadas: textoPlano(it.AccionesRecomendadas),
+    AccionesRealizadas: textoPlano(it.AccionesRealizadas),
+    EvaluacionEficacia: textoPlano(it.EvaluacionEficacia),
   };
 }
 
@@ -738,7 +771,7 @@ function agruparFactoresFoda(items){
   const grupos = {};
   soloRiesgo.forEach(it => {
     const tipoLabel = categoriaFoda(it);
-    const descripcion = campoValor(it.Descripcion) || '';
+    const descripcion = textoPlano(campoValor(it.Descripcion)) || '';
     // OJO: AnalisisID identifica toda una sesión de carga del FODA (todas las
     // fortalezas/debilidades/oportunidades/amenazas cargadas juntas por una
     // persona), NO un factor individual. Varias filas distintas (una
@@ -994,11 +1027,47 @@ function renderConsolidado(){
    RENDER: DASHBOARD
    ====================================================================== */
 function renderDashboard(){
-  const unicos = dedupePorAnalisisBase(amfeItems);
+  // ---- poblar selects de filtros (una sola vez por cambio de dataset) ----
+  const periodosSet = new Set(amfeItems.map(it=>it.Periodo).filter(Boolean));
+  const paisesSet = new Set(amfeItems.map(it=>it.Pais).filter(Boolean));
+  const procesosSet = new Set(amfeItems.map(it=>it.Proceso).filter(Boolean));
+  const selPeriodo = document.getElementById('dashFiltroPeriodo');
+  if(selPeriodo.dataset.built !== String(periodosSet.size)){
+    selPeriodo.innerHTML = '<option value="">Período: todos</option>' + [...periodosSet].sort().map(p=>`<option>${escapeHtml(p)}</option>`).join('');
+    selPeriodo.dataset.built = String(periodosSet.size);
+  }
+  const selPaisDash = document.getElementById('dashFiltroPais');
+  if(selPaisDash.dataset.built !== String(paisesSet.size)){
+    selPaisDash.innerHTML = '<option value="">País: todos</option>' + [...paisesSet].sort().map(p=>`<option>${escapeHtml(p)}</option>`).join('');
+    selPaisDash.dataset.built = String(paisesSet.size);
+  }
+  const selProcesoDash = document.getElementById('dashFiltroProceso');
+  if(selProcesoDash.dataset.built !== String(procesosSet.size)){
+    selProcesoDash.innerHTML = '<option value="">Proceso: todos</option>' + [...procesosSet].sort().map(p=>`<option>${escapeHtml(p)}</option>`).join('');
+    selProcesoDash.dataset.built = String(procesosSet.size);
+  }
+
+  // ---- aplicar filtros ----
+  const fPeriodo = selPeriodo.value;
+  const fPais = selPaisDash.value;
+  const fProceso = selProcesoDash.value;
+  const fResolucion = document.getElementById('dashFiltroResolucion').value;
+
+  const baseFiltrada = amfeItems.filter(it=>{
+    if(fPeriodo && it.Periodo !== fPeriodo) return false;
+    if(fPais && it.Pais !== fPais) return false;
+    if(fProceso && it.Proceso !== fProceso) return false;
+    if(fResolucion && it.Resolucion !== fResolucion) return false;
+    return true;
+  });
+
+  const unicos = dedupePorAnalisisBase(baseFiltrada);
 
   if(!unicos.length){
     document.getElementById('dashStatRow').innerHTML = '';
-    document.getElementById('matrizRiesgo').innerHTML = `<div class="empty-state"><p>Todavía no hay evaluaciones cargadas.</p></div>`;
+    document.getElementById('matrizRiesgo').innerHTML = amfeItems.length
+      ? `<div class="empty-state"><p>Ningún riesgo coincide con los filtros elegidos.</p></div>`
+      : `<div class="empty-state"><p>Todavía no hay evaluaciones cargadas.</p></div>`;
     document.getElementById('donutResolucion').innerHTML = '';
     document.getElementById('barrasProceso').innerHTML = '';
     document.getElementById('barrasPais').innerHTML = '';
@@ -1325,6 +1394,17 @@ document.querySelectorAll('.idx-select').forEach(sel=>{
 
 document.getElementById('btnRefrescarFoda').addEventListener('click', ()=> cargarFoda(true));
 document.getElementById('btnRefrescarAmfe').addEventListener('click', cargarAmfe);
+
+['dashFiltroPeriodo','dashFiltroPais','dashFiltroProceso','dashFiltroResolucion'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', renderDashboard);
+});
+document.getElementById('btnLimpiarFiltrosDash').addEventListener('click', ()=>{
+  document.getElementById('dashFiltroPeriodo').value = '';
+  document.getElementById('dashFiltroPais').value = '';
+  document.getElementById('dashFiltroProceso').value = '';
+  document.getElementById('dashFiltroResolucion').value = '';
+  renderDashboard();
+});
 document.getElementById('btnExportarCsv').addEventListener('click', exportarCsv);
 
 /* ======================================================================
