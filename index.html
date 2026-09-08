@@ -465,7 +465,7 @@
     <div class="grid-2" style="align-items:start;">
       <div class="card card-pad">
         <h2>Matriz de riesgo (Gravedad × Ocurrencia)</h2>
-        <p class="field-hint" style="margin-bottom:12px;">Cantidad de riesgos por combinación. El color usa Gravedad×Ocurrencia como referencia visual rápida — la Detección se suma aparte en el IPR final de cada riesgo.</p>
+        <p class="field-hint" style="margin-bottom:12px;">Cantidad de riesgos por combinación. El color de cada celda refleja el IPR real (Gravedad×Ocurrencia×Detección) promedio de esos riesgos, con los mismos umbrales de Significativo/Moderado/No significativo del resto de la app.</p>
         <div id="matrizRiesgo"></div>
       </div>
       <div class="card card-pad">
@@ -993,16 +993,6 @@ function renderConsolidado(){
 /* ======================================================================
    RENDER: DASHBOARD
    ====================================================================== */
-function bandaMatrizGxO(g, o){
-  // Referencia visual rápida solo con Gravedad×Ocurrencia (sin Detección),
-  // igual que muchas matrices de riesgo de FMEA que separan "riesgo
-  // inherente" de la capacidad de detección. Rango posible: 1 a 16.
-  const v = g * o;
-  if(v >= 10) return 'mc-high';
-  if(v >= 5) return 'mc-mid';
-  return 'mc-low';
-}
-
 function renderDashboard(){
   const unicos = dedupePorAnalisisBase(amfeItems);
 
@@ -1027,12 +1017,18 @@ function renderDashboard(){
   `;
 
   // ---- Matriz Gravedad × Ocurrencia ----
-  const conteo = {};
+  // El color de cada celda usa el IPR real (Gravedad×Ocurrencia×Detección)
+  // promedio de los riesgos que caen ahí, con los mismos umbrales de
+  // Significativo/Moderado/No significativo del resto de la app — así la
+  // Detección sí queda reflejada, no solo Gravedad y Ocurrencia.
+  const celdas = {};
   unicos.forEach(it=>{
     const g = Number(it.Gravedad), o = Number(it.Ocurrencia);
     if(!g || !o) return;
     const key = g + '-' + o;
-    conteo[key] = (conteo[key]||0) + 1;
+    if(!celdas[key]) celdas[key] = { count:0, sumIPR:0 };
+    celdas[key].count++;
+    celdas[key].sumIPR += Number(it.IPR) || 0;
   });
   let matrizHtml = `<div class="matrix-wrap">
     <div></div><div class="matrix-axis-label" style="grid-column:2/span 4">Ocurrencia →</div>`;
@@ -1040,8 +1036,14 @@ function renderDashboard(){
   for(let g=4; g>=1; g--){
     matrizHtml += `<div class="matrix-rowhead">${g===4?'Gravedad ':''}${g}</div>`;
     for(let o=1; o<=4; o++){
-      const n = conteo[g+'-'+o] || 0;
-      const cls = n===0 ? 'mc0' : bandaMatrizGxO(g,o);
+      const c = celdas[g+'-'+o];
+      const n = c ? c.count : 0;
+      let cls = 'mc0';
+      if(n > 0){
+        const avgIpr = c.sumIPR / c.count;
+        const band = bandaVisual(avgIpr);
+        cls = band.label === 'Significativo' ? 'mc-high' : (band.label === 'Moderado' ? 'mc-mid' : 'mc-low');
+      }
       matrizHtml += `<div class="matrix-cell ${cls}">${n || ''}</div>`;
     }
   }
