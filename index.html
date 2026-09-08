@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matriz AMFE — Gestión de Riesgos | Satus Ager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2420;
+    --ink-soft:#4B564F;
+    --paper:#F3F4F1;
+    --panel:#FFFFFF;
+    --line:#D8DBD4;
+    --line-soft:#E7E9E3;
+    --brand:#24463B;
+    --brand-soft:#E5EBE7;
+    --brand-strong:#152E26;
+    --amber:#B4790C;
+    --amber-bg:#FBF0DA;
+    --red:#A3372E;
+    --red-bg:#F8E4E1;
+    --green:#3F7A56;
+    --green-bg:#E5F0E8;
+    --focus:#2C6E8E;
+    --radius:3px;
+    --shadow:0 1px 2px rgba(27,36,32,.06), 0 1px 0 rgba(27,36,32,.04);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:var(--brand);}
+
+  /* ---------- Shell ---------- */
+  .topbar{
+    background:var(--brand-strong);
+    color:#EDEFEA;
+    padding:14px 22px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:40;
+    border-bottom:1px solid rgba(0,0,0,.18);
+  }
+  .topbar .brand{display:flex; align-items:baseline; gap:10px;}
+  .topbar .brand strong{font-size:16px; font-weight:600; letter-spacing:.2px;}
+  .topbar .brand span{font-size:12.5px; color:#B9C4BC;}
+  .topbar-actions{display:flex; align-items:center; gap:8px;}
+  .icon-btn{
+    background:transparent; border:1px solid rgba(255,255,255,.22); color:#EDEFEA;
+    width:32px; height:32px; border-radius:var(--radius); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,.10);}
+
+  .tabs{
+    display:flex; gap:2px; background:var(--brand);
+    padding:0 22px; overflow-x:auto;
+  }
+  .tab{
+    padding:11px 16px; color:#D9E2DC; font-size:13.5px; font-weight:500;
+    cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;
+    display:flex; align-items:center; gap:7px;
+  }
+  .tab:hover{color:#fff;}
+  .tab.active{color:#fff; border-bottom-color:var(--amber); background:rgba(255,255,255,.06);}
+  .tab .dot{width:6px; height:6px; border-radius:50%; background:#E3A23A;}
+
+  .locked-banner{
+    background:var(--amber-bg); color:#6B4A0C; border-bottom:1px solid #EAD3A0;
+    padding:8px 22px; font-size:13px; display:flex; align-items:center; gap:8px;
+  }
+
+  main{max-width:1180px; margin:0 auto; padding:26px 22px 80px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  h1{font-size:21px; font-weight:600; margin:0 0 4px; letter-spacing:-.2px;}
+  h2{font-size:16px; font-weight:600; margin:0 0 2px;}
+  .subtitle{color:var(--ink-soft); font-size:13.5px; margin:0 0 22px;}
+
+  .card{
+    background:var(--panel); border:1px solid var(--line-soft); border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .card + .card{margin-top:14px;}
+  .card-pad{padding:18px 20px;}
+  .card-head{
+    padding:14px 20px; border-bottom:1px solid var(--line-soft);
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:inherit; font-size:13.5px; font-weight:500; padding:9px 16px;
+    border-radius:var(--radius); border:1px solid var(--line); background:#fff;
+    color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn:hover{border-color:#B7BDB2;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn-primary{background:var(--brand); border-color:var(--brand); color:#fff;}
+  .btn-primary:hover{background:var(--brand-strong);}
+  .btn-ghost{background:transparent; border-color:transparent;}
+  .btn-ghost:hover{background:var(--brand-soft);}
+  .btn-sm{padding:6px 11px; font-size:12.5px;}
+  .btn-danger{color:var(--red); border-color:#E5C3BF;}
+  .btn-danger:hover{background:var(--red-bg);}
+
+  /* ---------- Forms ---------- */
+  label{display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; letter-spacing:.1px;}
+  .field{margin-bottom:16px;}
+  .field-hint{font-size:12px; color:#7D897F; margin-top:5px;}
+  input[type=text], input[type=date], input[type=number], select, textarea{
+    width:100%; font-family:inherit; font-size:14px; color:var(--ink);
+    padding:9px 11px; border:1px solid var(--line); border-radius:var(--radius);
+    background:#fff;
+  }
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--focus); outline-offset:0; border-color:var(--focus);}
+  textarea{resize:vertical; min-height:64px;}
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;}
+  @media (max-width:720px){ .grid-2, .grid-3{grid-template-columns:1fr;} }
+
+  .criteria-box{
+    background:var(--paper); border:1px solid var(--line-soft); border-radius:var(--radius);
+    padding:10px 12px; font-size:12.5px; color:var(--ink-soft); margin-top:6px; line-height:1.5;
+  }
+  .criteria-box b{color:var(--ink);}
+
+  /* ---------- Badges / chips ---------- */
+  .badge{
+    display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600;
+    padding:3px 8px; border-radius:999px; letter-spacing:.2px;
+  }
+  .badge-sig{background:var(--red-bg); color:var(--red);}
+  .badge-nosig{background:var(--green-bg); color:var(--green);}
+  .badge-pend{background:var(--amber-bg); color:#8A5F0C;}
+  .badge-neutral{background:var(--brand-soft); color:var(--brand);}
+  .chip{
+    display:inline-block; font-size:11.5px; padding:2px 8px; border-radius:999px;
+    background:#EEF0EB; color:var(--ink-soft); border:1px solid var(--line-soft);
+  }
+
+  /* ---------- Tables ---------- */
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th{
+    text-align:left; font-size:11.5px; font-weight:600; color:var(--ink-soft);
+    text-transform:none; letter-spacing:.1px; padding:9px 10px; border-bottom:1px solid var(--line);
+    background:#FAFAF8; white-space:nowrap;
+  }
+  td{padding:10px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+  tr:hover td{background:#FAFBF9;}
+  .ipr-cell{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:14px;}
+
+  .empty-state{
+    text-align:center; padding:48px 20px; color:var(--ink-soft);
+  }
+  .empty-state .icon{font-size:28px; margin-bottom:10px; opacity:.5;}
+  .empty-state h3{font-size:14.5px; color:var(--ink); margin:0 0 6px;}
+  .empty-state p{font-size:13px; margin:0; max-width:420px; margin:0 auto;}
+
+  /* ---------- Stat cards ---------- */
+  .stat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;}
+  @media (max-width:820px){ .stat-row{grid-template-columns:repeat(2,1fr);} }
+  .stat{background:var(--panel); border:1px solid var(--line-soft); border-radius:var(--radius); padding:14px 16px;}
+  .stat .num{font-size:24px; font-weight:700; font-family:'IBM Plex Mono',monospace;}
+  .stat .lbl{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+  .stat.sig .num{color:var(--red);}
+  .stat.mod .num{color:var(--amber);}
+  .stat.low .num{color:var(--green);}
+
+  /* ---------- Modal / drawer ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(21,28,24,.42); z-index:60;
+    display:none; align-items:flex-start; justify-content:center; overflow-y:auto; padding:32px 16px;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:#fff; border-radius:var(--radius); max-width:760px; width:100%;
+    box-shadow:0 12px 32px rgba(0,0,0,.18); border:1px solid var(--line-soft);
+  }
+  .modal-head{
+    padding:16px 22px; border-bottom:1px solid var(--line-soft);
+    display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+  }
+  .modal-body{padding:20px 22px; max-height:70vh; overflow-y:auto;}
+  .modal-foot{padding:14px 22px; border-top:1px solid var(--line-soft); display:flex; justify-content:flex-end; gap:8px;}
+
+  fieldset{border:1px solid var(--line-soft); border-radius:var(--radius); padding:14px 16px 16px; margin:0 0 18px;}
+  legend{font-size:12.5px; font-weight:600; color:var(--brand); padding:0 6px;}
+
+  .factor-src{
+    background:var(--paper); border:1px solid var(--line-soft); border-radius:var(--radius);
+    padding:12px 14px; margin-bottom:18px; font-size:13px;
+  }
+  .factor-src .row1{display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;}
+  .factor-src p{margin:0; color:var(--ink-soft);}
+
+  .toolbar{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:14px;}
+  .toolbar input[type=text], .toolbar select{width:auto;}
+  .spacer{flex:1;}
+
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+    background:var(--brand-strong); color:#fff; padding:11px 18px; border-radius:var(--radius);
+    font-size:13.5px; box-shadow:0 6px 20px rgba(0,0,0,.2); z-index:80; display:none;
+  }
+  .toast.show{display:block;}
+  .toast.error{background:var(--red);}
+
+  .config-row{display:flex; gap:8px; align-items:flex-end; margin-bottom:14px;}
+  .config-row .field{flex:1; margin-bottom:0;}
+  footer.note{color:#8B958C; font-size:12px; margin-top:26px; text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <strong>AMFE · Gestión de Riesgos</strong>
+    <span>Satus Ager — Sistema de Gestión Integrado</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="icon-btn" id="btnConfig" title="Configuración">⚙</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-view="pendientes"><span class="dot" id="dotPend" style="display:none"></span>Factores del FODA</div>
+  <div class="tab" data-view="consolidado">Consolidado AMFE</div>
+</div>
+
+<div class="locked-banner" id="lockedBanner" style="display:none">
+  🔒 Estás en modo consulta. Podés ver y filtrar todo el análisis, pero guardar o editar una evaluación requiere iniciar sesión con la cuenta autorizada.
+</div>
+
+<main>
+
+  <!-- ============ VISTA: FACTORES DEL FODA / PENDIENTES ============ -->
+  <div class="view active" id="view-pendientes">
+    <h1>Factores del Análisis de Contexto (FODA)</h1>
+    <p class="subtitle">Debilidades y Amenazas traídas automáticamente desde el consolidado FODA. Elegí una para evaluarla con la metodología AMFE, o cargá un riesgo que no provenga del FODA.</p>
+
+    <div class="toolbar">
+      <input type="text" id="filtroTexto" placeholder="Buscar por descripción...">
+      <select id="filtroTipo">
+        <option value="">Tipo: todos</option>
+        <option value="Debilidad">Debilidades</option>
+        <option value="Amenaza">Amenazas</option>
+      </select>
+      <select id="filtroPais">
+        <option value="">País: todos</option>
+      </select>
+      <select id="filtroEstado">
+        <option value="">Estado: todos</option>
+        <option value="pendiente">Sin evaluar</option>
+        <option value="evaluado">Ya evaluado</option>
+      </select>
+      <div class="spacer"></div>
+      <button class="btn btn-ghost btn-sm" id="btnRefrescarFoda">↻ Actualizar desde FODA</button>
+      <button class="btn btn-primary btn-sm" id="btnRiesgoManual">+ Riesgo manual</button>
+    </div>
+
+    <div class="card">
+      <div id="tablaFactoresWrap"></div>
+    </div>
+
+    <footer class="note" id="fuenteFoda"></footer>
+  </div>
+
+  <!-- ============ VISTA: CONSOLIDADO AMFE ============ -->
+  <div class="view" id="view-consolidado">
+    <h1>Consolidado AMFE</h1>
+    <p class="subtitle">Todos los riesgos evaluados, con su Índice de Prioridad de Riesgo (IPR) y estrategia de tratamiento. Vista de consulta.</p>
+
+    <div class="stat-row" id="statRow"></div>
+
+    <div class="toolbar">
+      <input type="text" id="cFiltroTexto" placeholder="Buscar...">
+      <select id="cFiltroProceso"><option value="">Proceso: todos</option></select>
+      <select id="cFiltroResolucion">
+        <option value="">Resolución: todas</option>
+        <option value="Significativo">Significativo</option>
+        <option value="No Significativo">No Significativo</option>
+      </select>
+      <select id="cFiltroPais"><option value="">País: todos</option></select>
+      <div class="spacer"></div>
+      <button class="btn btn-ghost btn-sm" id="btnRefrescarAmfe">↻ Actualizar</button>
+      <button class="btn btn-ghost btn-sm" id="btnExportarCsv">⬇ Exportar CSV</button>
+    </div>
+
+    <div class="card">
+      <div id="tablaConsolidadoWrap"></div>
+    </div>
+
+    <footer class="note" id="fuenteAmfe"></footer>
+  </div>
+
+</main>
+
+<!-- ============ MODAL: EVALUACIÓN AMFE ============ -->
+<div class="overlay" id="overlayEval">
+  <div class="modal" style="max-width:820px">
+    <div class="modal-head">
+      <div>
+        <h2 id="evalTitulo">Evaluar riesgo</h2>
+        <p class="subtitle" style="margin:2px 0 0">Completá los índices según los criterios definidos en el Procedimiento de Gestión de Riesgos y Oportunidades.</p>
+      </div>
+      <button class="icon-btn" style="color:var(--ink); border-color:var(--line)" id="btnCerrarEval">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="factor-src" id="factorSrcBox" style="display:none">
+        <div class="row1">
+          <span class="badge badge-neutral" id="factorSrcTipo"></span>
+          <span id="factorSrcPaises"></span>
+        </div>
+        <p id="factorSrcDesc"></p>
+      </div>
+
+      <form id="formEval">
+        <fieldset>
+          <legend>Identificación</legend>
+          <div class="grid-2">
+            <div class="field">
+              <label>Proceso</label>
+              <select id="fProceso">
+                <option value="">Seleccionar...</option>
+                <option>Planificación Estratégica</option>
+                <option>Comercial</option>
+                <option>Recursos Humanos</option>
+                <option>Producción</option>
+                <option>Planificación de la Producción</option>
+                <option>Contrataciones</option>
+                <option>Control de Calidad</option>
+                <option>Sistema de Gestión de Calidad</option>
+                <option>Comunicación</option>
+                <option>Análisis de Contexto y Partes Interesadas</option>
+                <option>Auditorías Externas</option>
+                <option>SHyMA</option>
+                <option>Otro</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Período</label>
+              <input type="text" id="fPeriodo" placeholder="Ej: 2026">
+            </div>
+          </div>
+          <div class="field">
+            <label>Modo de falla</label>
+            <input type="text" id="fModoFalla" placeholder="¿Cómo se manifiesta el riesgo?">
+          </div>
+          <div class="field">
+            <label>Efectos potenciales</label>
+            <textarea id="fEfectos" placeholder="Consecuencias si el riesgo se materializa"></textarea>
+          </div>
+          <div class="field">
+            <label>Causas potenciales</label>
+            <textarea id="fCausas" placeholder="Origen o motivo del riesgo"></textarea>
+          </div>
+          <div class="field">
+            <label>Controles actuales</label>
+            <textarea id="fControles" placeholder="Qué se hace hoy para mitigar u observar el riesgo"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Evaluación del riesgo (Gravedad × Ocurrencia × Detección)</legend>
+          <div class="grid-3">
+            <div class="field">
+              <label>Gravedad</label>
+              <select id="fGravedad" class="idx-select" data-target="gravedad"></select>
+              <div class="criteria-box" id="critGravedad"></div>
+            </div>
+            <div class="field">
+              <label>Ocurrencia</label>
+              <select id="fOcurrencia" class="idx-select" data-target="ocurrencia"></select>
+              <div class="criteria-box" id="critOcurrencia"></div>
+            </div>
+            <div class="field">
+              <label>Posibilidad de detección</label>
+              <select id="fDeteccion" class="idx-select" data-target="deteccion"></select>
+              <div class="criteria-box" id="critDeteccion"></div>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top:4px; align-items:center;">
+            <div>
+              <label style="margin-bottom:2px">Índice de Prioridad de Riesgo (IPR)</label>
+              <div style="font-size:30px; font-weight:700; font-family:'IBM Plex Mono',monospace" id="iprValor">—</div>
+            </div>
+            <div>
+              <label style="margin-bottom:2px">Resolución</label>
+              <div id="resolucionBadge">—</div>
+              <p class="field-hint">Obligatorio definir plan de acción si IPR ≥ 27 (procedimiento de gestión de riesgos).</p>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Tratamiento y seguimiento</legend>
+          <div class="grid-2">
+            <div class="field">
+              <label>Estrategia de tratamiento</label>
+              <select id="fEstrategia">
+                <option value="">Seleccionar...</option>
+                <option>Asumir riesgo</option>
+                <option>Mitigar riesgo</option>
+                <option>Reducir riesgo</option>
+                <option>Transferir riesgo</option>
+                <option>Evitar riesgo</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Responsable de la acción</label>
+              <input type="text" id="fResponsableAccion">
+            </div>
+          </div>
+          <div class="field">
+            <label>Acciones recomendadas</label>
+            <textarea id="fAcciones"></textarea>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>Plazo de verificación</label>
+              <input type="date" id="fPlazo">
+            </div>
+            <div class="field">
+              <label>Resultado</label>
+              <input type="text" id="fResultado" placeholder="Ej: En curso, Ejecutado, Sin avance">
+            </div>
+          </div>
+          <div class="field">
+            <label>Acciones realizadas</label>
+            <textarea id="fAccionesRealizadas"></textarea>
+          </div>
+          <div class="field">
+            <label>Evaluación de eficacia</label>
+            <textarea id="fEvalEficacia"></textarea>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="btnCancelarEval">Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarEval">Guardar evaluación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: CONFIGURACIÓN ============ -->
+<div class="overlay" id="overlayConfig">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-head">
+      <div>
+        <h2>Configuración</h2>
+        <p class="subtitle" style="margin:2px 0 0">URLs de los flujos de Power Automate. Uso avanzado.</p>
+      </div>
+      <button class="icon-btn" style="color:var(--ink); border-color:var(--line)" id="btnCerrarConfig">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>URL — FODA: Obtener Consolidado (lectura, reutilizada)</label>
+        <input type="text" id="cfgFodaGet">
+      </div>
+      <div class="field">
+        <label>URL — AMFE: Obtener Consolidado (lectura)</label>
+        <input type="text" id="cfgAmfeGet">
+      </div>
+      <div class="field">
+        <label>URL — AMFE: Guardar Evaluación (escritura — requiere login autorizado)</label>
+        <input type="text" id="cfgAmfeSave">
+        <div class="field-hint">Este flujo debe tener "Who can trigger the flow?" = Specific people in my organization (solo vos), a diferencia de los dos de lectura, que van en "Anyone".</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-danger" id="btnResetConfig">Restablecer valores de fábrica</button>
+      <button class="btn btn-primary" id="btnGuardarConfig">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================================================================
+   CONFIGURACIÓN
+   ====================================================================== */
+// Completar una vez creados los flujos de Power Automate. Ver memoria del
+// proyecto para el patrón de configuración de cada flujo HTTP.
+const DEFAULT_SP_FODA_GET_URL  = ''; // Reutiliza el flujo "FODA - Obtener Consolidado"
+const DEFAULT_SP_AMFE_GET_URL  = ''; // Nuevo flujo "AMFE - Obtener Consolidado" (trigger: Anyone)
+const DEFAULT_SP_AMFE_SAVE_URL = ''; // Nuevo flujo "AMFE - Guardar Evaluación" (trigger: Specific people)
+
+const LS_CONFIG = 'amfe_config_v1';
+const LS_AMFE_CACHE = 'amfe_cache_v1';
+const LS_FODA_CACHE = 'amfe_foda_cache_v1';
+
+function getConfig(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(LS_CONFIG) || '{}');
+    return {
+      fodaGet: saved.fodaGet || DEFAULT_SP_FODA_GET_URL,
+      amfeGet: saved.amfeGet || DEFAULT_SP_AMFE_GET_URL,
+      amfeSave: saved.amfeSave || DEFAULT_SP_AMFE_SAVE_URL,
+    };
+  }catch(e){
+    return { fodaGet: DEFAULT_SP_FODA_GET_URL, amfeGet: DEFAULT_SP_AMFE_GET_URL, amfeSave: DEFAULT_SP_AMFE_SAVE_URL };
+  }
+}
+function setConfig(cfg){ localStorage.setItem(LS_CONFIG, JSON.stringify(cfg)); }
+
+/* ======================================================================
+   CRITERIOS DE EVALUACIÓN
+   Fuente: Procedimiento de Gestión de Riesgos y Oportunidades (tablas de
+   Índice de Gravedad / Ocurrencia / Detección) y Matriz AMFE histórica.
+   ====================================================================== */
+const CRITERIOS = {
+  gravedad: [
+    {v:1, t:'Se detecta una oportunidad de mejora, pero no se requiere acción. Las consecuencias de la falla son despreciables'},
+    {v:2, t:'Las consecuencias de la falla son leves. Baja posibilidad de pérdida de reputación y/o pérdida de rentabilidad'},
+    {v:3, t:'Las consecuencias de la falla son moderadas. Posible pérdida de reputación y/o rentabilidad'},
+    {v:4, t:'Las consecuencias de la falla son severas. Pérdida de reputación y/o pérdida de rentabilidad'},
+  ],
+  ocurrencia: [
+    {v:1, t:'Ocurrencia remota'},
+    {v:2, t:'Baja tasa de ocurrencia. Poco frecuente'},
+    {v:3, t:'Falla ocurrente. Frecuente'},
+    {v:4, t:'Alta tasa de ocurrencia. Frecuencia alta'},
+  ],
+  deteccion: [
+    {v:1, t:'Mayor posibilidad de detección de la falla. Un control que previene que ocurra la falla'},
+    {v:2, t:'Posibilidad muy alta de detección de la falla. Un control que típicamente previene que ocurra la falla'},
+    {v:3, t:'Posibilidad muy baja de detección de la falla. Pocos o ningún control para prevenir la falla'},
+    {v:4, t:'No hay controles consistentes que prevengan la falla'},
+  ],
+};
+const UMBRAL_SIGNIFICATIVO = 27; // IPR >= 27 -> obligatorio plan de acción (procedimiento)
+
+function calcularIPR(g,o,d){
+  if(!g || !o || !d) return null;
+  return g*o*d;
+}
+function resolucionDeIPR(ipr){
+  if(ipr===null) return null;
+  return ipr >= UMBRAL_SIGNIFICATIVO ? 'Significativo' : 'No Significativo';
+}
+// Bandas visuales para el consolidado (no son parte del procedimiento formal,
+// solo ayudan a leer la tabla de un vistazo: el único corte oficial es 27).
+function bandaVisual(ipr){
+  if(ipr===null) return {label:'—', cls:'badge-neutral'};
+  if(ipr>=27) return {label:'Significativo', cls:'badge-sig'};
+  if(ipr>=13) return {label:'Moderado', cls:'badge-pend'};
+  return {label:'No Significativo', cls:'badge-nosig'};
+}
+
+/* ======================================================================
+   ESTADO
+   ====================================================================== */
+let fodaFactores = [];   // Debilidades/Amenazas del consolidado FODA (agrupadas)
+let amfeItems = [];      // Evaluaciones AMFE ya guardadas
+let modoEdicionDisponible = false; // se confirma recién al intentar guardar
+let evalActual = null;   // factor u item en edición dentro del modal
+
+/* ======================================================================
+   UTILIDADES
+   ====================================================================== */
+function toast(msg, isError){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=> el.className='toast', 3200);
+}
+function fmtDate(d){
+  if(!d) return '—';
+  try{ return new Date(d).toLocaleDateString('es-AR'); }catch(e){ return d; }
+}
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function uid(prefix){
+  return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7);
+}
+
+// Los campos de tipo Choice/Lookup de SharePoint llegan desde el conector
+// como objetos anidados, ej. { "Id": 0, "Value": "Argentina" }, no como texto
+// plano. Esta función devuelve el valor usable sea cual sea la forma en que
+// llegó el campo (objeto anidado o string directo).
+function campoValor(v){
+  if(v && typeof v === 'object'){
+    if('Value' in v) return v.Value;
+    if('DisplayName' in v) return v.DisplayName;
+  }
+  return v==null ? '' : v;
+}
+
+// Normaliza los campos Choice/Lookup de un item del AMFE que vuelven de
+// SharePoint envueltos en objeto ({Id,Value}) a texto plano, para que el
+// resto del código pueda tratarlos siempre como strings.
+function normalizarAmfeItem(it){
+  return {
+    ...it,
+    Pais: campoValor(it.Pais),
+    Proceso: campoValor(it.Proceso),
+    FactorOrigenTipo: campoValor(it.FactorOrigenTipo),
+    EstrategiaTratamiento: campoValor(it.EstrategiaTratamiento),
+    Resultado: campoValor(it.Resultado),
+    Resolucion: campoValor(it.Resolucion),
+  };
+}
+
+/* ======================================================================
+   FETCH: FODA (lectura, reutiliza el flujo existente)
+   ====================================================================== */
+async function cargarFoda(forzar){
+  const cfg = getConfig();
+  const wrap = document.getElementById('tablaFactoresWrap');
+  if(!cfg.fodaGet){
+    renderSinConfigurar('foda');
+    return;
+  }
+  try{
+    const resp = await fetch(cfg.fodaGet, { method:'GET' });
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const items = Array.isArray(data) ? data : (data.value || data.items || []);
+    fodaFactores = agruparFactoresFoda(items);
+    localStorage.setItem(LS_FODA_CACHE, JSON.stringify(fodaFactores));
+    document.getElementById('fuenteFoda').textContent = 'Fuente: SharePoint (FODA_ACTUALIZACION), actualizado ' + new Date().toLocaleString('es-AR');
+  }catch(e){
+    const cached = localStorage.getItem(LS_FODA_CACHE);
+    if(cached){
+      fodaFactores = JSON.parse(cached);
+      document.getElementById('fuenteFoda').textContent = 'No se pudo conectar con SharePoint — mostrando último consolidado guardado localmente.';
+    }else{
+      fodaFactores = [];
+      document.getElementById('fuenteFoda').textContent = 'No se pudo conectar con SharePoint y no hay datos guardados localmente.';
+    }
+  }
+  renderFactores();
+}
+
+// Une, por AnalisisID, las filas que el formulario FODA expandió por país
+// (una fila por país marcado), para presentar un solo factor por análisis.
+function tipoFodaDe(it){
+  // El campo real observado en SharePoint se llama "Factor" (Lookup),
+  // pero se deja de respaldo "Tipo_"/"Tipo" por si la lista se armó distinto.
+  return campoValor(it.Factor ?? it.Tipo_ ?? it.Tipo).toString().trim();
+}
+
+// Devuelve 'Debilidad' o 'Amenaza' (canónico, singular) sin importar si el
+// valor real en SharePoint viene en singular/plural o en mayúsculas
+// (ej. "AMENAZA", "AMENAZAS", "Amenaza" son todos válidos).
+function categoriaFoda(it){
+  const raw = tipoFodaDe(it).toLowerCase();
+  if(raw.startsWith('debilidad')) return 'Debilidad';
+  if(raw.startsWith('amenaza')) return 'Amenaza';
+  return null;
+}
+
+function agruparFactoresFoda(items){
+  const soloRiesgo = items.filter(it => categoriaFoda(it) !== null);
+  const grupos = {};
+  soloRiesgo.forEach(it => {
+    const key = it.AnalisisID || it.Titulo || it.Title || uid('f');
+    const tipoLabel = categoriaFoda(it);
+    if(!grupos[key]){
+      grupos[key] = {
+        analisisId: key,
+        tipo: tipoLabel,
+        descripcion: campoValor(it.Descripcion) || '',
+        periodo: campoValor(it.Periodo) || '',
+        responsable: campoValor(it.Responsable) || '',
+        tendencia: campoValor(it.Tendencia) || '',
+        paises: [],
+      };
+    }
+    const pais = campoValor(it.Pais) || campoValor(it['País']) || '';
+    if(pais && !grupos[key].paises.includes(pais)) grupos[key].paises.push(pais);
+  });
+  return Object.values(grupos).sort((a,b)=> a.tipo.localeCompare(b.tipo) || a.descripcion.localeCompare(b.descripcion));
+}
+
+/* ======================================================================
+   FETCH: AMFE (lectura)
+   ====================================================================== */
+async function cargarAmfe(){
+  const cfg = getConfig();
+  if(!cfg.amfeGet){
+    renderSinConfigurar('amfe');
+    return;
+  }
+  try{
+    const resp = await fetch(cfg.amfeGet, { method:'GET' });
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const items = Array.isArray(data) ? data : (data.value || data.items || []);
+    amfeItems = items.map(normalizarAmfeItem);
+    localStorage.setItem(LS_AMFE_CACHE, JSON.stringify(amfeItems));
+    document.getElementById('fuenteAmfe').textContent = 'Fuente: SharePoint (AMFE_ANALISIS_RIESGOS), actualizado ' + new Date().toLocaleString('es-AR');
+  }catch(e){
+    const cached = localStorage.getItem(LS_AMFE_CACHE);
+    if(cached){
+      amfeItems = JSON.parse(cached).map(normalizarAmfeItem);
+      document.getElementById('fuenteAmfe').textContent = 'No se pudo conectar con SharePoint — mostrando último consolidado guardado localmente.';
+    }else{
+      amfeItems = [];
+      document.getElementById('fuenteAmfe').textContent = 'No se pudo conectar con SharePoint y no hay datos guardados localmente.';
+    }
+  }
+  renderConsolidado();
+  renderFactores(); // para refrescar el estado "evaluado / pendiente"
+}
+
+function renderSinConfigurar(cual){
+  const target = cual==='foda' ? document.getElementById('tablaFactoresWrap') : document.getElementById('tablaConsolidadoWrap');
+  target.innerHTML = `<div class="empty-state">
+    <div class="icon">⚙</div>
+    <h3>Faltan datos de conexión</h3>
+    <p>Configurá la URL del flujo de Power Automate correspondiente desde el botón de configuración (⚙, arriba a la derecha).</p>
+  </div>`;
+}
+
+/* ======================================================================
+   GUARDAR EVALUACIÓN (escritura — requiere login autorizado en el flujo)
+   ====================================================================== */
+async function guardarEvaluacion(payloadBase, paises){
+  const cfg = getConfig();
+  if(!cfg.amfeSave){
+    toast('Falta configurar la URL de guardado del AMFE.', true);
+    return false;
+  }
+  // Igual que en el formulario FODA: si el factor de origen tiene varios
+  // países, se guarda un registro por país para poder filtrar el
+  // consolidado por país, pero la evaluación (G/O/D) es la misma para todos.
+  const listaPaises = (paises && paises.length) ? paises : [''];
+  const registros = listaPaises.map(pais => ({ ...payloadBase, Pais: pais, AnalisisID: uid('amfe') }));
+
+  try{
+    const resp = await fetch(cfg.amfeSave, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ registros })
+    });
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    toast('Evaluación guardada correctamente.');
+    return true;
+  }catch(e){
+    toast('No se pudo guardar. Si no iniciaste sesión con la cuenta autorizada, el flujo va a rechazar el guardado.', true);
+    return false;
+  }
+}
+
+/* ======================================================================
+   RENDER: TABLA DE FACTORES (FODA)
+   ====================================================================== */
+function estadoDeFactor(analisisId){
+  return amfeItems.some(it => it.FactorOrigenID === analisisId) ? 'evaluado' : 'pendiente';
+}
+
+function renderFactores(){
+  const wrap = document.getElementById('tablaFactoresWrap');
+  const texto = document.getElementById('filtroTexto').value.trim().toLowerCase();
+  const tipo = document.getElementById('filtroTipo').value;
+  const pais = document.getElementById('filtroPais').value;
+  const estado = document.getElementById('filtroEstado').value;
+
+  // poblar select de países una sola vez por dataset
+  const paisesSet = new Set();
+  fodaFactores.forEach(f => f.paises.forEach(p => paisesSet.add(p)));
+  const selPais = document.getElementById('filtroPais');
+  if(selPais.dataset.built !== String(paisesSet.size)){
+    selPais.innerHTML = '<option value="">País: todos</option>' + [...paisesSet].sort().map(p=>`<option>${escapeHtml(p)}</option>`).join('');
+    selPais.dataset.built = String(paisesSet.size);
+  }
+
+  let filtrados = fodaFactores.filter(f=>{
+    if(tipo && f.tipo !== tipo) return false;
+    if(pais && !f.paises.includes(pais)) return false;
+    if(texto && !f.descripcion.toLowerCase().includes(texto)) return false;
+    const est = estadoDeFactor(f.analisisId);
+    if(estado && est !== estado) return false;
+    return true;
+  });
+
+  const pendCount = fodaFactores.filter(f=> estadoDeFactor(f.analisisId)==='pendiente').length;
+  const dot = document.getElementById('dotPend');
+  dot.style.display = pendCount>0 ? 'inline-block' : 'none';
+
+  if(!fodaFactores.length){
+    wrap.innerHTML = `<div class="empty-state">
+      <div class="icon">◇</div>
+      <h3>Todavía no hay factores cargados</h3>
+      <p>Verificá la configuración o hacé clic en "Actualizar desde FODA".</p>
+    </div>`;
+    return;
+  }
+  if(!filtrados.length){
+    wrap.innerHTML = `<div class="empty-state"><h3>Sin resultados</h3><p>Ajustá los filtros de búsqueda.</p></div>`;
+    return;
+  }
+
+  let html = `<table><thead><tr>
+    <th>Tipo</th><th style="width:32%">Descripción</th><th>País(es)</th><th>Período</th><th>Tendencia</th><th>Estado</th><th></th>
+  </tr></thead><tbody>`;
+  filtrados.forEach(f=>{
+    const est = estadoDeFactor(f.analisisId);
+    html += `<tr>
+      <td><span class="chip">${escapeHtml(f.tipo)}</span></td>
+      <td>${escapeHtml(f.descripcion)}</td>
+      <td>${f.paises.map(p=>`<span class="chip">${escapeHtml(p)}</span>`).join(' ')}</td>
+      <td>${escapeHtml(f.periodo||'—')}</td>
+      <td>${escapeHtml(f.tendencia||'—')}</td>
+      <td>${est==='evaluado' ? '<span class="badge badge-nosig">Evaluado</span>' : '<span class="badge badge-pend">Sin evaluar</span>'}</td>
+      <td><button class="btn btn-sm" data-eval-factor="${escapeHtml(f.analisisId)}">${est==='evaluado' ? 'Ver / re-evaluar' : 'Evaluar'}</button></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll('[data-eval-factor]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const factor = fodaFactores.find(f=>f.analisisId === btn.dataset.evalFactor);
+      abrirModalEvaluacion(factor, null);
+    });
+  });
+}
+
+/* ======================================================================
+   RENDER: CONSOLIDADO AMFE
+   ====================================================================== */
+function renderConsolidado(){
+  const wrap = document.getElementById('tablaConsolidadoWrap');
+  const texto = document.getElementById('cFiltroTexto').value.trim().toLowerCase();
+  const proceso = document.getElementById('cFiltroProceso').value;
+  const resolucion = document.getElementById('cFiltroResolucion').value;
+  const pais = document.getElementById('cFiltroPais').value;
+
+  const procesosSet = new Set(amfeItems.map(it=>it.Proceso).filter(Boolean));
+  const paisesSet = new Set(amfeItems.map(it=>it.Pais).filter(Boolean));
+  const selProc = document.getElementById('cFiltroProceso');
+  if(selProc.dataset.built !== String(procesosSet.size)){
+    selProc.innerHTML = '<option value="">Proceso: todos</option>' + [...procesosSet].sort().map(p=>`<option>${escapeHtml(p)}</option>`).join('');
+    selProc.dataset.built = String(procesosSet.size);
+  }
+  const selPais = document.getElementById('cFiltroPais');
+  if(selPais.dataset.built !== String(paisesSet.size)){
+    selPais.innerHTML = '<option value="">País: todos</option>' + [...paisesSet].sort().map(p=>`<option>${escapeHtml(p)}</option>`).join('');
+    selPais.dataset.built = String(paisesSet.size);
+  }
+
+  // stats sobre el set único de evaluaciones (no repetido por país expandido)
+  const unicos = dedupePorAnalisisBase(amfeItems);
+  const sig = unicos.filter(it=> it.Resolucion==='Significativo').length;
+  const mod = unicos.filter(it=> { const b=bandaVisual(Number(it.IPR)); return b.label==='Moderado'; }).length;
+  const low = unicos.filter(it=> it.Resolucion==='No Significativo').length - mod;
+  document.getElementById('statRow').innerHTML = `
+    <div class="stat"><div class="num">${unicos.length}</div><div class="lbl">Riesgos evaluados</div></div>
+    <div class="stat sig"><div class="num">${sig}</div><div class="lbl">Significativos (IPR ≥ 27)</div></div>
+    <div class="stat mod"><div class="num">${mod}</div><div class="lbl">Moderados</div></div>
+    <div class="stat low"><div class="num">${Math.max(low,0)}</div><div class="lbl">No significativos</div></div>
+  `;
+
+  let filtrados = amfeItems.filter(it=>{
+    if(proceso && it.Proceso !== proceso) return false;
+    if(resolucion && it.Resolucion !== resolucion) return false;
+    if(pais && it.Pais !== pais) return false;
+    if(texto && !((it.ModoFalla||'')+' '+(it.CausasPotenciales||'')).toLowerCase().includes(texto)) return false;
+    return true;
+  });
+
+  if(!amfeItems.length){
+    wrap.innerHTML = `<div class="empty-state">
+      <div class="icon">◇</div>
+      <h3>Todavía no hay evaluaciones cargadas</h3>
+      <p>Las evaluaciones que se guarden desde "Factores del FODA" van a aparecer acá.</p>
+    </div>`;
+    return;
+  }
+  if(!filtrados.length){
+    wrap.innerHTML = `<div class="empty-state"><h3>Sin resultados</h3><p>Ajustá los filtros de búsqueda.</p></div>`;
+    return;
+  }
+
+  filtrados.sort((a,b)=> Number(b.IPR||0) - Number(a.IPR||0));
+
+  let html = `<table><thead><tr>
+    <th>Proceso</th><th style="width:22%">Modo de falla</th><th>País</th>
+    <th>G</th><th>O</th><th>D</th><th>IPR</th><th>Resolución</th><th>Tratamiento</th>
+  </tr></thead><tbody>`;
+  filtrados.forEach(it=>{
+    const ipr = Number(it.IPR);
+    const band = bandaVisual(ipr);
+    html += `<tr>
+      <td>${escapeHtml(it.Proceso||'—')}</td>
+      <td>${escapeHtml(it.ModoFalla||'—')}</td>
+      <td>${it.Pais ? `<span class="chip">${escapeHtml(it.Pais)}</span>` : '—'}</td>
+      <td class="mono">${escapeHtml(String(it.Gravedad||'—'))}</td>
+      <td class="mono">${escapeHtml(String(it.Ocurrencia||'—'))}</td>
+      <td class="mono">${escapeHtml(String(it.Deteccion||'—'))}</td>
+      <td class="ipr-cell">${isNaN(ipr) ? '—' : ipr}</td>
+      <td><span class="badge ${band.cls}">${band.label}</span></td>
+      <td>${escapeHtml(it.EstrategiaTratamiento||'—')}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+// Para las métricas, no contar el mismo análisis una vez por cada país
+// expandido — se agrupa por AnalisisID (o por Título si no hay AnalisisID).
+function dedupePorAnalisisBase(items){
+  const vistos = new Set();
+  const out = [];
+  items.forEach(it=>{
+    const key = (it.AnalisisID || it.Titulo || it.Title || '').split('::')[0] || uid('u');
+    const clave = it.FactorOrigenID ? it.FactorOrigenID : (it.Titulo||it.Title||key);
+    if(!vistos.has(clave)){ vistos.add(clave); out.push(it); }
+  });
+  return out;
+}
+
+function exportarCsv(){
+  if(!amfeItems.length){ toast('No hay datos para exportar.', true); return; }
+  const cols = ['Proceso','ModoFalla','EfectosPotenciales','CausasPotenciales','ControlesActuales','Pais','Gravedad','Ocurrencia','Deteccion','IPR','Resolucion','EstrategiaTratamiento','AccionesRecomendadas','ResponsableAccion','PlazoVerificacion','Resultado'];
+  const rows = [cols.join(',')];
+  amfeItems.forEach(it=>{
+    rows.push(cols.map(c=>{
+      const v = campoValor(it[c]).toString().replace(/"/g,'""');
+      return `"${v}"`;
+    }).join(','));
+  });
+  const blob = new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'AMFE_consolidado_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ======================================================================
+   MODAL DE EVALUACIÓN
+   ====================================================================== */
+function poblarSelectsCriterios(){
+  ['gravedad','ocurrencia','deteccion'].forEach(key=>{
+    const sel = document.querySelector(`.idx-select[data-target="${key}"]`);
+    sel.innerHTML = '<option value="">Seleccionar...</option>' +
+      CRITERIOS[key].map(c=>`<option value="${c.v}">${c.v} — ${c.t.split('.')[0]}</option>`).join('');
+  });
+}
+
+function abrirModalEvaluacion(factor, itemExistente){
+  evalActual = { factor, itemExistente };
+  const overlay = document.getElementById('overlayEval');
+  const srcBox = document.getElementById('factorSrcBox');
+  document.getElementById('formEval').reset();
+
+  if(factor){
+    document.getElementById('evalTitulo').textContent = 'Evaluar riesgo — origen FODA';
+    srcBox.style.display = 'block';
+    document.getElementById('factorSrcTipo').textContent = factor.tipo;
+    document.getElementById('factorSrcPaises').innerHTML = factor.paises.map(p=>`<span class="chip">${escapeHtml(p)}</span>`).join(' ');
+    document.getElementById('factorSrcDesc').textContent = factor.descripcion;
+    document.getElementById('fCausas').value = factor.descripcion;
+    document.getElementById('fPeriodo').value = factor.periodo || '';
+  }else{
+    document.getElementById('evalTitulo').textContent = 'Nuevo riesgo (carga manual)';
+    srcBox.style.display = 'none';
+  }
+
+  // si ya existe una evaluación previa para este factor, precargarla
+  const previo = factor ? amfeItems.find(it => it.FactorOrigenID === factor.analisisId) : itemExistente;
+  if(previo){
+    document.getElementById('fProceso').value = previo.Proceso || '';
+    document.getElementById('fModoFalla').value = previo.ModoFalla || '';
+    document.getElementById('fEfectos').value = previo.EfectosPotenciales || '';
+    document.getElementById('fCausas').value = previo.CausasPotenciales || document.getElementById('fCausas').value;
+    document.getElementById('fControles').value = previo.ControlesActuales || '';
+    document.getElementById('fGravedad').value = previo.Gravedad || '';
+    document.getElementById('fOcurrencia').value = previo.Ocurrencia || '';
+    document.getElementById('fDeteccion').value = previo.Deteccion || '';
+    document.getElementById('fEstrategia').value = previo.EstrategiaTratamiento || '';
+    document.getElementById('fResponsableAccion').value = previo.ResponsableAccion || '';
+    document.getElementById('fAcciones').value = previo.AccionesRecomendadas || '';
+    document.getElementById('fPlazo').value = previo.PlazoVerificacion ? previo.PlazoVerificacion.slice(0,10) : '';
+    document.getElementById('fResultado').value = previo.Resultado || '';
+    document.getElementById('fAccionesRealizadas').value = previo.AccionesRealizadas || '';
+    document.getElementById('fEvalEficacia').value = previo.EvaluacionEficacia || '';
+  }
+
+  actualizarCriteriosVisibles();
+  actualizarIPR();
+  overlay.classList.add('open');
+}
+
+function actualizarCriteriosVisibles(){
+  ['gravedad','ocurrencia','deteccion'].forEach(key=>{
+    const sel = document.querySelector(`.idx-select[data-target="${key}"]`);
+    const box = document.getElementById('crit' + key.charAt(0).toUpperCase() + key.slice(1));
+    const val = Number(sel.value);
+    const crit = CRITERIOS[key].find(c=>c.v===val);
+    box.innerHTML = crit ? `<b>${crit.v}.</b> ${escapeHtml(crit.t)}` : 'Elegí un valor para ver la descripción del criterio.';
+  });
+}
+
+function actualizarIPR(){
+  const g = Number(document.getElementById('fGravedad').value) || 0;
+  const o = Number(document.getElementById('fOcurrencia').value) || 0;
+  const d = Number(document.getElementById('fDeteccion').value) || 0;
+  const ipr = calcularIPR(g,o,d);
+  document.getElementById('iprValor').textContent = ipr===null ? '—' : ipr;
+  const res = resolucionDeIPR(ipr);
+  const badge = document.getElementById('resolucionBadge');
+  if(res===null){ badge.innerHTML = '—'; return; }
+  badge.innerHTML = `<span class="badge ${res==='Significativo' ? 'badge-sig' : 'badge-nosig'}">${res}</span>`;
+}
+
+function cerrarModalEvaluacion(){
+  document.getElementById('overlayEval').classList.remove('open');
+  evalActual = null;
+}
+
+async function onGuardarEvaluacion(){
+  const g = Number(document.getElementById('fGravedad').value);
+  const o = Number(document.getElementById('fOcurrencia').value);
+  const d = Number(document.getElementById('fDeteccion').value);
+  if(!g || !o || !d){
+    toast('Completá Gravedad, Ocurrencia y Detección antes de guardar.', true);
+    return;
+  }
+  const proceso = document.getElementById('fProceso').value;
+  if(!proceso){
+    toast('Seleccioná el proceso.', true);
+    return;
+  }
+  const ipr = calcularIPR(g,o,d);
+  const resolucion = resolucionDeIPR(ipr);
+  const factor = evalActual ? evalActual.factor : null;
+
+  const payloadBase = {
+    Titulo: 'AMFE-' + (proceso||'').slice(0,3).toUpperCase() + '-' + Date.now().toString(36),
+    Fecha: new Date().toISOString(),
+    Periodo: document.getElementById('fPeriodo').value,
+    Responsable: '', // completar según el usuario autenticado en el flujo, si aplica
+    FactorOrigenID: factor ? factor.analisisId : '',
+    FactorOrigenTipo: factor ? factor.tipo : 'Manual',
+    Proceso: proceso,
+    ModoFalla: document.getElementById('fModoFalla').value,
+    EfectosPotenciales: document.getElementById('fEfectos').value,
+    CausasPotenciales: document.getElementById('fCausas').value,
+    ControlesActuales: document.getElementById('fControles').value,
+    Gravedad: g,
+    Ocurrencia: o,
+    Deteccion: d,
+    IPR: ipr,
+    Resolucion: resolucion,
+    EstrategiaTratamiento: document.getElementById('fEstrategia').value,
+    AccionesRecomendadas: document.getElementById('fAcciones').value,
+    PlazoVerificacion: document.getElementById('fPlazo').value ? new Date(document.getElementById('fPlazo').value).toISOString() : '',
+    ResponsableAccion: document.getElementById('fResponsableAccion').value,
+    Resultado: document.getElementById('fResultado').value,
+    AccionesRealizadas: document.getElementById('fAccionesRealizadas').value,
+    EvaluacionEficacia: document.getElementById('fEvalEficacia').value,
+  };
+
+  const paises = factor ? factor.paises : [];
+  const ok = await guardarEvaluacion(payloadBase, paises);
+  if(ok){
+    cerrarModalEvaluacion();
+    cargarAmfe();
+  }
+}
+
+/* ======================================================================
+   NAVEGACIÓN / EVENTOS
+   ====================================================================== */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-' + tab.dataset.view).classList.add('active');
+  });
+});
+
+document.getElementById('btnConfig').addEventListener('click', ()=>{
+  const cfg = getConfig();
+  document.getElementById('cfgFodaGet').value = cfg.fodaGet;
+  document.getElementById('cfgAmfeGet').value = cfg.amfeGet;
+  document.getElementById('cfgAmfeSave').value = cfg.amfeSave;
+  document.getElementById('overlayConfig').classList.add('open');
+});
+document.getElementById('btnCerrarConfig').addEventListener('click', ()=> document.getElementById('overlayConfig').classList.remove('open'));
+document.getElementById('btnGuardarConfig').addEventListener('click', ()=>{
+  setConfig({
+    fodaGet: document.getElementById('cfgFodaGet').value.trim(),
+    amfeGet: document.getElementById('cfgAmfeGet').value.trim(),
+    amfeSave: document.getElementById('cfgAmfeSave').value.trim(),
+  });
+  document.getElementById('overlayConfig').classList.remove('open');
+  toast('Configuración guardada.');
+  cargarFoda(); cargarAmfe();
+});
+document.getElementById('btnResetConfig').addEventListener('click', ()=>{
+  localStorage.removeItem(LS_CONFIG);
+  document.getElementById('cfgFodaGet').value = DEFAULT_SP_FODA_GET_URL;
+  document.getElementById('cfgAmfeGet').value = DEFAULT_SP_AMFE_GET_URL;
+  document.getElementById('cfgAmfeSave').value = DEFAULT_SP_AMFE_SAVE_URL;
+  toast('Valores de fábrica restablecidos.');
+});
+
+document.getElementById('btnCerrarEval').addEventListener('click', cerrarModalEvaluacion);
+document.getElementById('btnCancelarEval').addEventListener('click', cerrarModalEvaluacion);
+document.getElementById('btnGuardarEval').addEventListener('click', onGuardarEvaluacion);
+document.getElementById('btnRiesgoManual').addEventListener('click', ()=> abrirModalEvaluacion(null, null));
+
+document.querySelectorAll('.idx-select').forEach(sel=>{
+  sel.addEventListener('change', ()=>{ actualizarCriteriosVisibles(); actualizarIPR(); });
+});
+
+['filtroTexto','filtroTipo','filtroPais','filtroEstado'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderFactores);
+  document.getElementById(id).addEventListener('change', renderFactores);
+});
+['cFiltroTexto','cFiltroProceso','cFiltroResolucion','cFiltroPais'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderConsolidado);
+  document.getElementById(id).addEventListener('change', renderConsolidado);
+});
+
+document.getElementById('btnRefrescarFoda').addEventListener('click', ()=> cargarFoda(true));
+document.getElementById('btnRefrescarAmfe').addEventListener('click', cargarAmfe);
+document.getElementById('btnExportarCsv').addEventListener('click', exportarCsv);
+
+/* ======================================================================
+   INIT
+   ====================================================================== */
+poblarSelectsCriterios();
+cargarFoda();
+cargarAmfe();
+</script>
+</body>
+</html>
