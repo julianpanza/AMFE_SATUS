@@ -293,6 +293,9 @@
       <select id="filtroPais">
         <option value="">País: todos</option>
       </select>
+      <select id="filtroPeriodo">
+        <option value="">Período: todos</option>
+      </select>
       <select id="filtroEstado">
         <option value="">Estado: todos</option>
         <option value="pendiente">Sin evaluar</option>
@@ -910,6 +913,7 @@ function renderFactores(){
   const texto = document.getElementById('filtroTexto').value.trim().toLowerCase();
   const tipo = document.getElementById('filtroTipo').value;
   const pais = document.getElementById('filtroPais').value;
+  const periodo = document.getElementById('filtroPeriodo').value;
   const estado = document.getElementById('filtroEstado').value;
 
   // poblar select de países una sola vez por dataset
@@ -921,9 +925,18 @@ function renderFactores(){
     selPais.dataset.built = String(paisesSet.size);
   }
 
+  // poblar select de períodos una sola vez por dataset
+  const periodosSet = new Set(fodaFactores.map(f=>f.periodo).filter(Boolean));
+  const selPeriodo = document.getElementById('filtroPeriodo');
+  if(selPeriodo.dataset.built !== String(periodosSet.size)){
+    selPeriodo.innerHTML = '<option value="">Período: todos</option>' + [...periodosSet].sort().reverse().map(p=>`<option>${escapeHtml(p)}</option>`).join('');
+    selPeriodo.dataset.built = String(periodosSet.size);
+  }
+
   let filtrados = fodaFactores.filter(f=>{
     if(tipo && f.tipo !== tipo) return false;
     if(pais && !f.paises.includes(pais)) return false;
+    if(periodo && f.periodo !== periodo) return false;
     if(texto && !f.descripcion.toLowerCase().includes(texto)) return false;
     const est = estadoDeFactor(f.analisisId);
     if(estado && est !== estado) return false;
@@ -1434,7 +1447,7 @@ document.querySelectorAll('.idx-select').forEach(sel=>{
   sel.addEventListener('change', ()=>{ actualizarCriteriosVisibles(); actualizarIPR(); });
 });
 
-['filtroTexto','filtroTipo','filtroPais','filtroEstado'].forEach(id=>{
+['filtroTexto','filtroTipo','filtroPais','filtroPeriodo','filtroEstado'].forEach(id=>{
   document.getElementById(id).addEventListener('input', renderFactores);
   document.getElementById(id).addEventListener('change', renderFactores);
 });
