@@ -519,6 +519,7 @@
         <option value="No Significativo">No Significativo</option>
       </select>
       <select id="cFiltroPais"><option value="">País: todos</option></select>
+      <select id="cFiltroPeriodo"><option value="">Período: todos</option></select>
       <div class="spacer"></div>
       <button class="btn btn-ghost btn-sm" id="btnRefrescarAmfe">↻ Actualizar</button>
       <button class="btn btn-ghost btn-sm" id="btnExportarCsv">⬇ Exportar CSV</button>
@@ -995,9 +996,11 @@ function renderConsolidado(){
   const proceso = document.getElementById('cFiltroProceso').value;
   const resolucion = document.getElementById('cFiltroResolucion').value;
   const pais = document.getElementById('cFiltroPais').value;
+  const periodo = document.getElementById('cFiltroPeriodo').value;
 
   const procesosSet = new Set(amfeItems.map(it=>it.Proceso).filter(Boolean));
   const paisesSet = new Set(amfeItems.map(it=>it.Pais).filter(Boolean));
+  const periodosSet = new Set(amfeItems.map(it=>it.Periodo).filter(Boolean));
   const selProc = document.getElementById('cFiltroProceso');
   if(selProc.dataset.built !== String(procesosSet.size)){
     selProc.innerHTML = '<option value="">Proceso: todos</option>' + [...procesosSet].sort().map(p=>`<option>${escapeHtml(p)}</option>`).join('');
@@ -1007,6 +1010,11 @@ function renderConsolidado(){
   if(selPais.dataset.built !== String(paisesSet.size)){
     selPais.innerHTML = '<option value="">País: todos</option>' + [...paisesSet].sort().map(p=>`<option>${escapeHtml(p)}</option>`).join('');
     selPais.dataset.built = String(paisesSet.size);
+  }
+  const selPeriodo = document.getElementById('cFiltroPeriodo');
+  if(selPeriodo.dataset.built !== String(periodosSet.size)){
+    selPeriodo.innerHTML = '<option value="">Período: todos</option>' + [...periodosSet].sort().reverse().map(p=>`<option>${escapeHtml(p)}</option>`).join('');
+    selPeriodo.dataset.built = String(periodosSet.size);
   }
 
   // stats sobre el set único de evaluaciones (no repetido por país expandido)
@@ -1025,6 +1033,7 @@ function renderConsolidado(){
     if(proceso && it.Proceso !== proceso) return false;
     if(resolucion && it.Resolucion !== resolucion) return false;
     if(pais && it.Pais !== pais) return false;
+    if(periodo && it.Periodo !== periodo) return false;
     if(texto && !((it.ModoFalla||'')+' '+(it.CausasPotenciales||'')).toLowerCase().includes(texto)) return false;
     return true;
   });
@@ -1227,7 +1236,7 @@ function dedupePorAnalisisBase(items){
 
 function exportarCsv(){
   if(!amfeItems.length){ toast('No hay datos para exportar.', true); return; }
-  const cols = ['Proceso','ModoFalla','EfectosPotenciales','CausasPotenciales','ControlesActuales','Pais','Gravedad','Ocurrencia','Deteccion','IPR','Resolucion','EstrategiaTratamiento','AccionesRecomendadas','ResponsableAccion','PlazoVerificacion','Resultado'];
+  const cols = ['Proceso','Periodo','ModoFalla','EfectosPotenciales','CausasPotenciales','ControlesActuales','Pais','Gravedad','Ocurrencia','Deteccion','IPR','Resolucion','EstrategiaTratamiento','AccionesRecomendadas','ResponsableAccion','PlazoVerificacion','Resultado'];
   const rows = [cols.join(',')];
   amfeItems.forEach(it=>{
     rows.push(cols.map(c=>{
@@ -1451,7 +1460,7 @@ document.querySelectorAll('.idx-select').forEach(sel=>{
   document.getElementById(id).addEventListener('input', renderFactores);
   document.getElementById(id).addEventListener('change', renderFactores);
 });
-['cFiltroTexto','cFiltroProceso','cFiltroResolucion','cFiltroPais'].forEach(id=>{
+['cFiltroTexto','cFiltroProceso','cFiltroResolucion','cFiltroPais','cFiltroPeriodo'].forEach(id=>{
   document.getElementById(id).addEventListener('input', renderConsolidado);
   document.getElementById(id).addEventListener('change', renderConsolidado);
 });
