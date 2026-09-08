@@ -848,17 +848,40 @@ function renderSinConfigurar(cual){
 /* ======================================================================
    GUARDAR EVALUACIÓN (escritura — requiere login autorizado en el flujo)
    ====================================================================== */
-async function guardarEvaluacion(payloadBase, paises){
+async function guardarEvaluacion(payloadBase, paises, factorOrigenId){
   const cfg = getConfig();
   if(!cfg.amfeSave){
     toast('Falta configurar la URL de guardado del AMFE.', true);
     return false;
   }
+  // Si este factor ya tiene evaluaciones guardadas (una por país), hay que
+  // ACTUALIZARLAS, no crear registros nuevos. Armamos un mapa País -> {ID de
+  // SharePoint, AnalisisID} de lo que ya existe para ese factor.
+  const existentesPorPais = {};
+  if(factorOrigenId){
+    amfeItems.forEach(it=>{
+      if(it.FactorOrigenID === factorOrigenId){
+        existentesPorPais[it.Pais || ''] = { id: it.ID, analisisId: it.AnalisisID };
+      }
+    });
+  }
+
   // Igual que en el formulario FODA: si el factor de origen tiene varios
   // países, se guarda un registro por país para poder filtrar el
   // consolidado por país, pero la evaluación (G/O/D) es la misma para todos.
   const listaPaises = (paises && paises.length) ? paises : [''];
-  const registros = listaPaises.map(pais => ({ ...payloadBase, Pais: pais, AnalisisID: uid('amfe') }));
+  const registros = listaPaises.map(pais => {
+    const existente = existentesPorPais[pais];
+    return {
+      ...payloadBase,
+      Pais: pais,
+      // Si ya existía un registro para este país, reutilizamos su ID (para
+      // que el flujo lo actualice) y su AnalisisID original. Si es nuevo,
+      // se crea con un AnalisisID nuevo y sin ItemId.
+      ItemId: existente ? existente.id : null,
+      AnalisisID: existente ? existente.analisisId : uid('amfe'),
+    };
+  });
 
   try{
     const resp = await fetch(cfg.amfeSave, {
@@ -1349,7 +1372,7 @@ async function onGuardarEvaluacion(){
   };
 
   const paises = factor ? factor.paises : [];
-  const ok = await guardarEvaluacion(payloadBase, paises);
+  const ok = await guardarEvaluacion(payloadBase, paises, factor ? factor.analisisId : null);
   if(ok){
     cerrarModalEvaluacion();
     cargarAmfe();
