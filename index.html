@@ -501,6 +501,13 @@
       <h2>Riesgos por País</h2>
       <div id="barrasPais"></div>
     </div>
+
+    <div class="card" style="margin-top:14px;">
+      <div class="card-head">
+        <h2 style="margin:0">Detalle de riesgos filtrados</h2>
+      </div>
+      <div id="tablaDashboardDetalle"></div>
+    </div>
   </div>
 
   <!-- ============ VISTA: CONSOLIDADO AMFE ============ -->
@@ -1051,13 +1058,18 @@ function renderConsolidado(){
     return;
   }
 
-  filtrados.sort((a,b)=> Number(b.IPR||0) - Number(a.IPR||0));
+  wrap.innerHTML = construirTablaRiesgos(filtrados);
+}
 
+// Tabla de riesgos reutilizada tanto en Consolidado como en el detalle del
+// Dashboard: Proceso, Modo de falla, País, G/O/D, IPR, Resolución, Tratamiento.
+function construirTablaRiesgos(items){
+  const ordenados = [...items].sort((a,b)=> Number(b.IPR||0) - Number(a.IPR||0));
   let html = `<table><thead><tr>
     <th>Proceso</th><th style="width:22%">Modo de falla</th><th>País</th>
     <th>G</th><th>O</th><th>D</th><th>IPR</th><th>Resolución</th><th>Tratamiento</th>
   </tr></thead><tbody>`;
-  filtrados.forEach(it=>{
+  ordenados.forEach(it=>{
     const ipr = Number(it.IPR);
     const band = bandaVisual(ipr);
     html += `<tr>
@@ -1073,7 +1085,7 @@ function renderConsolidado(){
     </tr>`;
   });
   html += '</tbody></table>';
-  wrap.innerHTML = html;
+  return html;
 }
 
 /* ======================================================================
@@ -1124,6 +1136,7 @@ function renderDashboard(){
     document.getElementById('donutResolucion').innerHTML = '';
     document.getElementById('barrasProceso').innerHTML = '';
     document.getElementById('barrasPais').innerHTML = '';
+    document.getElementById('tablaDashboardDetalle').innerHTML = '';
     return;
   }
 
@@ -1193,6 +1206,9 @@ function renderDashboard(){
   renderBarrasAgrupadas('barrasProceso', unicos, it=> it.Proceso || 'Sin proceso');
   // ---- Barras por País ----
   renderBarrasAgrupadas('barrasPais', unicos, it=> it.Pais || 'Sin país');
+
+  // ---- Tabla de detalle (una fila por país, igual que en Consolidado) ----
+  document.getElementById('tablaDashboardDetalle').innerHTML = construirTablaRiesgos(baseFiltrada);
 }
 
 function renderBarrasAgrupadas(containerId, items, campoFn){
