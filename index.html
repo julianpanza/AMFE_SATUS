@@ -272,6 +272,151 @@
       <div id="tablaFactoresWrap"></div>
     </div>
 
+    <div id="panelEvaluacion" class="card" style="display:none; margin-top:14px;">
+      <div class="modal-head">
+        <div>
+          <h2 id="evalTitulo">Evaluar riesgo</h2>
+          <p class="subtitle" style="margin:2px 0 0">Completá los índices según los criterios definidos en el Procedimiento de Gestión de Riesgos y Oportunidades.</p>
+        </div>
+        <button class="icon-btn" style="color:var(--ink); border-color:var(--line)" id="btnCerrarEval">✕</button>
+      </div>
+      <div class="modal-body" style="max-height:none;">
+        <div class="factor-src" id="factorSrcBox" style="display:none">
+          <div class="row1">
+            <span class="badge badge-neutral" id="factorSrcTipo"></span>
+            <span id="factorSrcPaises"></span>
+          </div>
+          <p id="factorSrcDesc"></p>
+        </div>
+
+        <form id="formEval">
+          <fieldset>
+            <legend>Identificación</legend>
+            <div class="field">
+              <label>Modo de falla</label>
+              <input type="text" id="fModoFalla" placeholder="¿Cómo se manifiesta el riesgo?">
+            </div>
+            <div class="field">
+              <label>Efectos potenciales</label>
+              <textarea id="fEfectos" placeholder="Consecuencias si el riesgo se materializa"></textarea>
+            </div>
+            <div class="field">
+              <label>Causas potenciales</label>
+              <textarea id="fCausas" placeholder="Origen o motivo del riesgo"></textarea>
+            </div>
+            <div class="field">
+              <label>Controles actuales</label>
+              <textarea id="fControles" placeholder="Qué se hace hoy para mitigar u observar el riesgo"></textarea>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Proceso</label>
+                <select id="fProceso">
+                  <option value="">Seleccionar...</option>
+                  <option>Planificación Estratégica</option>
+                  <option>Comercial</option>
+                  <option>Recursos Humanos</option>
+                  <option>Producción</option>
+                  <option>Planificación de la Producción</option>
+                  <option>Contrataciones</option>
+                  <option>Control de Calidad</option>
+                  <option>Sistema de Gestión de Calidad</option>
+                  <option>Comunicación</option>
+                  <option>Análisis de Contexto y Partes Interesadas</option>
+                  <option>Auditorías Externas</option>
+                  <option>SHyMA</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Período</label>
+                <input type="text" id="fPeriodo" placeholder="Ej: 2026">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Evaluación del riesgo (Gravedad × Ocurrencia × Detección)</legend>
+            <div class="grid-3">
+              <div class="field">
+                <label>Gravedad</label>
+                <select id="fGravedad" class="idx-select" data-target="gravedad"></select>
+                <div class="criteria-box" id="critGravedad"></div>
+              </div>
+              <div class="field">
+                <label>Ocurrencia</label>
+                <select id="fOcurrencia" class="idx-select" data-target="ocurrencia"></select>
+                <div class="criteria-box" id="critOcurrencia"></div>
+              </div>
+              <div class="field">
+                <label>Posibilidad de detección</label>
+                <select id="fDeteccion" class="idx-select" data-target="deteccion"></select>
+                <div class="criteria-box" id="critDeteccion"></div>
+              </div>
+            </div>
+            <div class="grid-2" style="margin-top:4px; align-items:center;">
+              <div>
+                <label style="margin-bottom:2px">Índice de Prioridad de Riesgo (IPR)</label>
+                <div style="font-size:30px; font-weight:700; font-family:'IBM Plex Mono',monospace" id="iprValor">—</div>
+              </div>
+              <div>
+                <label style="margin-bottom:2px">Resolución</label>
+                <div id="resolucionBadge">—</div>
+                <p class="field-hint">Obligatorio definir plan de acción si IPR ≥ 27 (procedimiento de gestión de riesgos).</p>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Tratamiento y seguimiento</legend>
+            <div class="grid-2">
+              <div class="field">
+                <label>Estrategia de tratamiento</label>
+                <select id="fEstrategia">
+                  <option value="">Seleccionar...</option>
+                  <option>Asumir riesgo</option>
+                  <option>Mitigar riesgo</option>
+                  <option>Reducir riesgo</option>
+                  <option>Transferir riesgo</option>
+                  <option>Evitar riesgo</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Responsable de la acción</label>
+                <input type="text" id="fResponsableAccion">
+              </div>
+            </div>
+            <div class="field">
+              <label>Acciones recomendadas</label>
+              <textarea id="fAcciones"></textarea>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Plazo de verificación</label>
+                <input type="date" id="fPlazo">
+              </div>
+              <div class="field">
+                <label>Resultado</label>
+                <input type="text" id="fResultado" placeholder="Ej: En curso, Ejecutado, Sin avance">
+              </div>
+            </div>
+            <div class="field">
+              <label>Acciones realizadas</label>
+              <textarea id="fAccionesRealizadas"></textarea>
+            </div>
+            <div class="field">
+              <label>Evaluación de eficacia</label>
+              <textarea id="fEvalEficacia"></textarea>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" id="btnCancelarEval">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardarEval">Guardar evaluación</button>
+      </div>
+    </div>
+
     <footer class="note" id="fuenteFoda"></footer>
   </div>
 
@@ -304,154 +449,6 @@
   </div>
 
 </main>
-
-<!-- ============ MODAL: EVALUACIÓN AMFE ============ -->
-<div class="overlay" id="overlayEval">
-  <div class="modal" style="max-width:820px">
-    <div class="modal-head">
-      <div>
-        <h2 id="evalTitulo">Evaluar riesgo</h2>
-        <p class="subtitle" style="margin:2px 0 0">Completá los índices según los criterios definidos en el Procedimiento de Gestión de Riesgos y Oportunidades.</p>
-      </div>
-      <button class="icon-btn" style="color:var(--ink); border-color:var(--line)" id="btnCerrarEval">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="factor-src" id="factorSrcBox" style="display:none">
-        <div class="row1">
-          <span class="badge badge-neutral" id="factorSrcTipo"></span>
-          <span id="factorSrcPaises"></span>
-        </div>
-        <p id="factorSrcDesc"></p>
-      </div>
-
-      <form id="formEval">
-        <fieldset>
-          <legend>Identificación</legend>
-          <div class="grid-2">
-            <div class="field">
-              <label>Proceso</label>
-              <select id="fProceso">
-                <option value="">Seleccionar...</option>
-                <option>Planificación Estratégica</option>
-                <option>Comercial</option>
-                <option>Recursos Humanos</option>
-                <option>Producción</option>
-                <option>Planificación de la Producción</option>
-                <option>Contrataciones</option>
-                <option>Control de Calidad</option>
-                <option>Sistema de Gestión de Calidad</option>
-                <option>Comunicación</option>
-                <option>Análisis de Contexto y Partes Interesadas</option>
-                <option>Auditorías Externas</option>
-                <option>SHyMA</option>
-                <option>Otro</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Período</label>
-              <input type="text" id="fPeriodo" placeholder="Ej: 2026">
-            </div>
-          </div>
-          <div class="field">
-            <label>Modo de falla</label>
-            <input type="text" id="fModoFalla" placeholder="¿Cómo se manifiesta el riesgo?">
-          </div>
-          <div class="field">
-            <label>Efectos potenciales</label>
-            <textarea id="fEfectos" placeholder="Consecuencias si el riesgo se materializa"></textarea>
-          </div>
-          <div class="field">
-            <label>Causas potenciales</label>
-            <textarea id="fCausas" placeholder="Origen o motivo del riesgo"></textarea>
-          </div>
-          <div class="field">
-            <label>Controles actuales</label>
-            <textarea id="fControles" placeholder="Qué se hace hoy para mitigar u observar el riesgo"></textarea>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Evaluación del riesgo (Gravedad × Ocurrencia × Detección)</legend>
-          <div class="grid-3">
-            <div class="field">
-              <label>Gravedad</label>
-              <select id="fGravedad" class="idx-select" data-target="gravedad"></select>
-              <div class="criteria-box" id="critGravedad"></div>
-            </div>
-            <div class="field">
-              <label>Ocurrencia</label>
-              <select id="fOcurrencia" class="idx-select" data-target="ocurrencia"></select>
-              <div class="criteria-box" id="critOcurrencia"></div>
-            </div>
-            <div class="field">
-              <label>Posibilidad de detección</label>
-              <select id="fDeteccion" class="idx-select" data-target="deteccion"></select>
-              <div class="criteria-box" id="critDeteccion"></div>
-            </div>
-          </div>
-          <div class="grid-2" style="margin-top:4px; align-items:center;">
-            <div>
-              <label style="margin-bottom:2px">Índice de Prioridad de Riesgo (IPR)</label>
-              <div style="font-size:30px; font-weight:700; font-family:'IBM Plex Mono',monospace" id="iprValor">—</div>
-            </div>
-            <div>
-              <label style="margin-bottom:2px">Resolución</label>
-              <div id="resolucionBadge">—</div>
-              <p class="field-hint">Obligatorio definir plan de acción si IPR ≥ 27 (procedimiento de gestión de riesgos).</p>
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Tratamiento y seguimiento</legend>
-          <div class="grid-2">
-            <div class="field">
-              <label>Estrategia de tratamiento</label>
-              <select id="fEstrategia">
-                <option value="">Seleccionar...</option>
-                <option>Asumir riesgo</option>
-                <option>Mitigar riesgo</option>
-                <option>Reducir riesgo</option>
-                <option>Transferir riesgo</option>
-                <option>Evitar riesgo</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Responsable de la acción</label>
-              <input type="text" id="fResponsableAccion">
-            </div>
-          </div>
-          <div class="field">
-            <label>Acciones recomendadas</label>
-            <textarea id="fAcciones"></textarea>
-          </div>
-          <div class="grid-2">
-            <div class="field">
-              <label>Plazo de verificación</label>
-              <input type="date" id="fPlazo">
-            </div>
-            <div class="field">
-              <label>Resultado</label>
-              <input type="text" id="fResultado" placeholder="Ej: En curso, Ejecutado, Sin avance">
-            </div>
-          </div>
-          <div class="field">
-            <label>Acciones realizadas</label>
-            <textarea id="fAccionesRealizadas"></textarea>
-          </div>
-          <div class="field">
-            <label>Evaluación de eficacia</label>
-            <textarea id="fEvalEficacia"></textarea>
-          </div>
-        </fieldset>
-      </form>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" id="btnCancelarEval">Cancelar</button>
-      <button class="btn btn-primary" id="btnGuardarEval">Guardar evaluación</button>
-    </div>
-  </div>
-</div>
 
 <!-- ============ MODAL: CONFIGURACIÓN ============ -->
 <div class="overlay" id="overlayConfig">
@@ -970,7 +967,7 @@ function poblarSelectsCriterios(){
 
 function abrirModalEvaluacion(factor, itemExistente){
   evalActual = { factor, itemExistente };
-  const overlay = document.getElementById('overlayEval');
+  const panel = document.getElementById('panelEvaluacion');
   const srcBox = document.getElementById('factorSrcBox');
   document.getElementById('formEval').reset();
 
@@ -1009,7 +1006,8 @@ function abrirModalEvaluacion(factor, itemExistente){
 
   actualizarCriteriosVisibles();
   actualizarIPR();
-  overlay.classList.add('open');
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 function actualizarCriteriosVisibles(){
@@ -1035,7 +1033,7 @@ function actualizarIPR(){
 }
 
 function cerrarModalEvaluacion(){
-  document.getElementById('overlayEval').classList.remove('open');
+  document.getElementById('panelEvaluacion').style.display = 'none';
   evalActual = null;
 }
 
