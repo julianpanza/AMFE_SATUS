@@ -473,9 +473,14 @@
         <input type="text" id="cfgAmfeGet">
       </div>
       <div class="field">
-        <label>URL — AMFE: Guardar Evaluación (escritura — requiere login autorizado)</label>
+        <label>URL — AMFE: Guardar Evaluación (escritura)</label>
         <input type="text" id="cfgAmfeSave">
-        <div class="field-hint">Este flujo debe tener "Who can trigger the flow?" = Specific people in my organization (solo vos), a diferencia de los dos de lectura, que van en "Anyone".</div>
+        <div class="field-hint">Este flujo va con trigger "Anyone" (como los de lectura). El control de acceso real lo da el PIN de abajo, que el flujo valida antes de guardar.</div>
+      </div>
+      <div class="field">
+        <label>PIN de guardado</label>
+        <input type="text" id="cfgAmfePin" placeholder="Frase secreta configurada en el flujo">
+        <div class="field-hint">Tiene que coincidir exactamente con la que pusiste en la Condition del flujo "AMFE - Guardar Evaluación". No la compartas con quienes solo consultan el formulario.</div>
       </div>
     </div>
     <div class="modal-foot">
@@ -508,9 +513,10 @@ function getConfig(){
       fodaGet: saved.fodaGet || DEFAULT_SP_FODA_GET_URL,
       amfeGet: saved.amfeGet || DEFAULT_SP_AMFE_GET_URL,
       amfeSave: saved.amfeSave || DEFAULT_SP_AMFE_SAVE_URL,
+      amfePin: saved.amfePin || '',
     };
   }catch(e){
-    return { fodaGet: DEFAULT_SP_FODA_GET_URL, amfeGet: DEFAULT_SP_AMFE_GET_URL, amfeSave: DEFAULT_SP_AMFE_SAVE_URL };
+    return { fodaGet: DEFAULT_SP_FODA_GET_URL, amfeGet: DEFAULT_SP_AMFE_GET_URL, amfeSave: DEFAULT_SP_AMFE_SAVE_URL, amfePin: '' };
   }
 }
 function setConfig(cfg){ localStorage.setItem(LS_CONFIG, JSON.stringify(cfg)); }
@@ -753,13 +759,13 @@ async function guardarEvaluacion(payloadBase, paises){
     const resp = await fetch(cfg.amfeSave, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ registros })
+      body: JSON.stringify({ pin: cfg.amfePin, registros })
     });
     if(!resp.ok) throw new Error('HTTP ' + resp.status);
     toast('Evaluación guardada correctamente.');
     return true;
   }catch(e){
-    toast('No se pudo guardar. Si no iniciaste sesión con la cuenta autorizada, el flujo va a rechazar el guardado.', true);
+    toast('No se pudo guardar. Revisá que el PIN configurado coincida con el que espera el flujo.', true);
     return false;
   }
 }
@@ -1101,6 +1107,7 @@ document.getElementById('btnConfig').addEventListener('click', ()=>{
   document.getElementById('cfgFodaGet').value = cfg.fodaGet;
   document.getElementById('cfgAmfeGet').value = cfg.amfeGet;
   document.getElementById('cfgAmfeSave').value = cfg.amfeSave;
+  document.getElementById('cfgAmfePin').value = cfg.amfePin;
   document.getElementById('overlayConfig').classList.add('open');
 });
 document.getElementById('btnCerrarConfig').addEventListener('click', ()=> document.getElementById('overlayConfig').classList.remove('open'));
@@ -1109,6 +1116,7 @@ document.getElementById('btnGuardarConfig').addEventListener('click', ()=>{
     fodaGet: document.getElementById('cfgFodaGet').value.trim(),
     amfeGet: document.getElementById('cfgAmfeGet').value.trim(),
     amfeSave: document.getElementById('cfgAmfeSave').value.trim(),
+    amfePin: document.getElementById('cfgAmfePin').value.trim(),
   });
   document.getElementById('overlayConfig').classList.remove('open');
   toast('Configuración guardada.');
@@ -1119,6 +1127,7 @@ document.getElementById('btnResetConfig').addEventListener('click', ()=>{
   document.getElementById('cfgFodaGet').value = DEFAULT_SP_FODA_GET_URL;
   document.getElementById('cfgAmfeGet').value = DEFAULT_SP_AMFE_GET_URL;
   document.getElementById('cfgAmfeSave').value = DEFAULT_SP_AMFE_SAVE_URL;
+  document.getElementById('cfgAmfePin').value = '';
   toast('Valores de fábrica restablecidos.');
 });
 
