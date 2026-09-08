@@ -668,13 +668,20 @@ function agruparFactoresFoda(items){
   const soloRiesgo = items.filter(it => categoriaFoda(it) !== null);
   const grupos = {};
   soloRiesgo.forEach(it => {
-    const key = it.AnalisisID || it.Titulo || it.Title || uid('f');
     const tipoLabel = categoriaFoda(it);
+    const descripcion = campoValor(it.Descripcion) || '';
+    // OJO: AnalisisID identifica toda una sesión de carga del FODA (todas las
+    // fortalezas/debilidades/oportunidades/amenazas cargadas juntas por una
+    // persona), NO un factor individual. Varias filas distintas (una
+    // Debilidad, una Amenaza, etc.) comparten el mismo AnalisisID.
+    // La clave real de un factor único (antes de expandir por país) es la
+    // combinación sesión + tipo + descripción.
+    const key = `${it.AnalisisID || it.Titulo || it.Title || uid('f')}::${tipoLabel}::${descripcion}`;
     if(!grupos[key]){
       grupos[key] = {
         analisisId: key,
         tipo: tipoLabel,
-        descripcion: campoValor(it.Descripcion) || '',
+        descripcion: descripcion,
         periodo: campoValor(it.Periodo) || '',
         responsable: campoValor(it.Responsable) || '',
         tendencia: campoValor(it.Tendencia) || '',
