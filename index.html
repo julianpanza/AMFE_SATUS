@@ -362,6 +362,7 @@
                   <option>SHyMA</option>
                   <option>Otro</option>
                 </select>
+                <input type="text" id="fProcesoOtro" placeholder="Especificar proceso" style="display:none; margin-top:6px;">
               </div>
               <div class="field">
                 <label>Período</label>
@@ -623,6 +624,13 @@ const CRITERIOS = {
   ],
 };
 const UMBRAL_SIGNIFICATIVO = 27; // IPR >= 27 -> obligatorio plan de acción (procedimiento)
+
+const PROCESOS_CONOCIDOS = [
+  'Planificación Estratégica','Comercial','Recursos Humanos','Producción',
+  'Planificación de la Producción','Contrataciones','Control de Calidad',
+  'Sistema de Gestión de Calidad','Comunicación',
+  'Análisis de Contexto y Partes Interesadas','Auditorías Externas','SHyMA',
+];
 
 function calcularIPR(g,o,d){
   if(!g || !o || !d) return null;
@@ -1231,8 +1239,19 @@ function abrirModalEvaluacion(factor, itemExistente){
 
   // si ya existe una evaluación previa para este factor, precargarla
   const previo = factor ? amfeItems.find(it => it.FactorOrigenID === factor.analisisId) : itemExistente;
+  const selProceso = document.getElementById('fProceso');
+  const inputProcesoOtro = document.getElementById('fProcesoOtro');
+  inputProcesoOtro.style.display = 'none';
+  inputProcesoOtro.value = '';
   if(previo){
-    document.getElementById('fProceso').value = previo.Proceso || '';
+    if(previo.Proceso && !PROCESOS_CONOCIDOS.includes(previo.Proceso)){
+      // era un proceso escrito a mano (custom): seleccionar "Otro" y precargar el texto
+      selProceso.value = 'Otro';
+      inputProcesoOtro.style.display = 'block';
+      inputProcesoOtro.value = previo.Proceso;
+    }else{
+      selProceso.value = previo.Proceso || '';
+    }
     document.getElementById('fModoFalla').value = previo.ModoFalla || '';
     document.getElementById('fEfectos').value = previo.EfectosPotenciales || '';
     document.getElementById('fCausas').value = previo.CausasPotenciales || document.getElementById('fCausas').value;
@@ -1290,7 +1309,11 @@ async function onGuardarEvaluacion(){
     toast('Completá Gravedad, Ocurrencia y Detección antes de guardar.', true);
     return;
   }
-  const proceso = document.getElementById('fProceso').value;
+  let proceso = document.getElementById('fProceso').value;
+  if(proceso === 'Otro'){
+    const custom = document.getElementById('fProcesoOtro').value.trim();
+    if(custom) proceso = custom;
+  }
   if(!proceso){
     toast('Seleccioná el proceso.', true);
     return;
@@ -1378,6 +1401,11 @@ document.getElementById('btnCerrarEval').addEventListener('click', cerrarModalEv
 document.getElementById('btnCancelarEval').addEventListener('click', cerrarModalEvaluacion);
 document.getElementById('btnGuardarEval').addEventListener('click', onGuardarEvaluacion);
 document.getElementById('btnRiesgoManual').addEventListener('click', ()=> abrirModalEvaluacion(null, null));
+document.getElementById('fProceso').addEventListener('change', ()=>{
+  const otro = document.getElementById('fProcesoOtro');
+  otro.style.display = document.getElementById('fProceso').value === 'Otro' ? 'block' : 'none';
+  if(document.getElementById('fProceso').value !== 'Otro') otro.value = '';
+});
 
 document.querySelectorAll('.idx-select').forEach(sel=>{
   sel.addEventListener('change', ()=>{ actualizarCriteriosVisibles(); actualizarIPR(); });
